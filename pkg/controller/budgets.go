@@ -17,6 +17,7 @@
 package controller
 
 import (
+	"errors"
 	"github.com/SENERGY-Platform/budget/pkg/models"
 )
 
@@ -25,6 +26,9 @@ func (c *Controller) GetBudgets(limit int, offset int, roles []string, userId, b
 }
 
 func (c *Controller) SetBudget(budget models.Budget) (err error) {
+	if !budget.Valid() {
+		return errors.New("invalid budget")
+	}
 	return c.db.SetBudget(budget)
 }
 

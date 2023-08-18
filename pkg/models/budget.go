@@ -22,3 +22,16 @@ type Budget struct {
 	UserId           string `json:"user_id,omitempty"`
 	Value            uint64 `json:"value"`
 }
+
+func (b *Budget) Valid() bool {
+	if len(b.BudgetIdentifier) == 0 {
+		return false
+	}
+	if len(b.Role) == 0 && len(b.UserId) == 0 {
+		return false
+	}
+	if len(b.Role) > 0 && len(b.UserId) > 0 {
+		return false
+	}
+	return true
+}
