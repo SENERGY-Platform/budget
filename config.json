@@ -1,0 +1,12 @@
+{
+  "api_port": "8080",
+  "mongo_table": "budget",
+  "mongo_url": "mongodb://localhost:27017",
+  "mongo_repl_set": true,
+  "mongo_budget_collection": "budgets",
+  "mongo_timeout": "10s",
+  "import_deploy_url": "https://api.senergy.infai.org/import/deploy",
+  "import_repo_url":"https://api.senergy.infai.org/import/repo",
+  "admin_allow_always": true,
+  "debug": true
+}
