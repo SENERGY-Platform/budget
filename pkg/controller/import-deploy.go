@@ -67,8 +67,10 @@ func (c *Controller) CheckImportDeploy(request *models.ParsedRequest) (int, erro
 		if err != nil {
 			return http.StatusInternalServerError, err
 		}
-
-		availableBudget := totalBudget - usedBudget
+		var availableBudget uint64 = 0
+		if totalBudget-usedBudget > 0 {
+			availableBudget = totalBudget - usedBudget
+		}
 		if requiredBudget > availableBudget {
 			if c.config.Debug {
 				log.Printf("Forbidden: Budget exceeded, required %d, available %d, total %d\n", requiredBudget, availableBudget, totalBudget)
