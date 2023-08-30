@@ -7,6 +7,8 @@
   "mongo_timeout": "10s",
   "import_deploy_url": "https://api.senergy.infai.org/import/deploy",
   "import_repo_url":"https://api.senergy.infai.org/import/repo",
+  "analytics_parsing_url":"https://api.senergy.infai.org/analytics/flow-parser/v2",
+  "analytics_pipelines_url": "https://api.senergy.infai.org/analytics/pipeline",
   "admin_allow_always": true,
   "debug": true
 }

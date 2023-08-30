@@ -25,17 +25,17 @@ import (
 )
 
 func init() {
-	endpoints = append(endpoints, CheckImportDeployEndpoints)
+	endpoints = append(endpoints, CheckFlowEngineEndpoints)
 }
 
-func CheckImportDeployEndpoints(router *httprouter.Router, _ configuration.Config, control *controller.Controller) {
-	router.POST("/check/import/deploy", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
+func CheckFlowEngineEndpoints(router *httprouter.Router, _ configuration.Config, control *controller.Controller) {
+	router.POST("/check/analytics/flow-engine", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		parsed, err := util.ParseRequest(request.Body)
 		if err != nil {
 			http.Error(writer, err.Error(), http.StatusBadRequest)
 		}
 
-		code, err := control.CheckImportDeploy(parsed)
+		code, err := control.CheckFlowEngine(parsed)
 		if err != nil {
 			http.Error(writer, err.Error(), code)
 		}

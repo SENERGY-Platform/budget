@@ -39,6 +39,9 @@ type ConfigStruct struct {
 	ImportDeployUrl string `json:"import_deploy_url"`
 	ImportRepoUrl   string `json:"import_repo_url"`
 
+	AnalyticsParsingUrl   string `json:"analytics_parsing_url"`
+	AnalyticsPipelinesUrl string `json:"analytics_pipelines_url"`
+
 	AdminAllowAlways bool `json:"admin_allow_always"`
 
 	Debug bool `json:"debug"`
