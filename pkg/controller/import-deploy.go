@@ -68,7 +68,7 @@ func (c *Controller) CheckImportDeploy(request *models.ParsedRequest) (int, erro
 			return http.StatusInternalServerError, err
 		}
 		var availableBudget uint64 = 0
-		if totalBudget-usedBudget > 0 {
+		if totalBudget > usedBudget { // check for underflow
 			availableBudget = totalBudget - usedBudget
 		}
 		if requiredBudget > availableBudget {
