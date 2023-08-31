@@ -24,7 +24,9 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
+	"time"
 )
 
 func main() {
@@ -38,9 +40,24 @@ func main() {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	wg, err := pkg.Start(ctx, config)
+	onError := func(err error, wg *sync.WaitGroup) {
+		log.Println("FATAL: " + err.Error())
+		cancel()
+		if wg != nil {
+			go func() { // safety routine shuts program down if wg does not finish
+				d := 10 * time.Second
+				<-time.After(d)
+				log.Println("Could not shutdown in " + d.String() + ", halting now")
+				os.Exit(1)
+			}()
+			wg.Wait()
+		}
+		os.Exit(1)
+	}
+
+	wg, err := pkg.Start(ctx, config, onError)
 	if err != nil {
-		log.Fatal(err)
+		onError(err, wg)
 	}
 
 	go func() {

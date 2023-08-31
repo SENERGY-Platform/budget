@@ -10,5 +10,10 @@
   "analytics_parsing_url":"https://api.senergy.infai.org/analytics/flow-parser/v2",
   "analytics_pipelines_url": "https://api.senergy.infai.org/analytics/pipeline",
   "admin_allow_always": true,
+  "check_and_quit": false,
+  "keycloak_client_id": "budget",
+  "keycloak_client_secret": "",
+  "keycloak_url": "https://auth.senergy.infai.org",
+  "slack_webhook_url": "",
   "debug": true
 }

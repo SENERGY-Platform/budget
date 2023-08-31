@@ -22,19 +22,37 @@ import (
 	"github.com/SENERGY-Platform/budget/pkg/configuration"
 	"github.com/SENERGY-Platform/budget/pkg/controller"
 	"github.com/SENERGY-Platform/budget/pkg/database"
+	"github.com/SENERGY-Platform/budget/pkg/validator"
 	"sync"
 )
 
 // starts services and goroutines; returns a waiting group which is done as soon as all go routines are stopped
-func Start(ctx context.Context, config configuration.Config) (wg *sync.WaitGroup, err error) {
+func Start(parent context.Context, config configuration.Config, onError func(err error, wg *sync.WaitGroup)) (wg *sync.WaitGroup, err error) {
 	wg = &sync.WaitGroup{}
-
+	ctx, cancel := context.WithCancel(parent)
 	db, err := database.New(config, ctx, wg)
 	if err != nil {
 		return wg, err
 	}
 
 	control := controller.New(config, db)
-	err = api.Start(ctx, wg, config, control)
+
+	if config.CheckAndQuit {
+		v, err := validator.New(config, control)
+		if err != nil {
+			return wg, err
+		}
+		wg.Add(1)
+		go func() {
+			err := v.Run()
+			wg.Done()
+			cancel()
+			if err != nil {
+				onError(err, wg)
+			}
+		}()
+	} else {
+		err = api.Start(ctx, wg, config, control)
+	}
 	return
 }

@@ -26,8 +26,6 @@ import (
 	"slices"
 )
 
-const flowEngineBudgetIdentifier = "flow-engine"
-
 func (c *Controller) CheckFlowEngine(request *models.ParsedRequest) (int, error) {
 	if c.config.AdminAllowAlways && slices.Contains(request.Roles, "admin") {
 		if c.config.Debug {
@@ -76,11 +74,11 @@ func (c *Controller) CheckFlowEngine(request *models.ParsedRequest) (int, error)
 		}
 	}
 
-	totalBudget, err := c.CheckBudgets(request.Roles, request.UserId, flowEngineBudgetIdentifier)
+	totalBudget, err := c.CheckBudgets(request.Roles, request.UserId, models.BudgeIdentifierFlowEngine)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
-	usedBudget, err := c.getCurrentlyUsedFlowEngineBudget(request.AuthToken, request.UserId)
+	usedBudget, err := c.GetCurrentlyUsedFlowEngineBudget(request.AuthToken, request.UserId)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
@@ -106,7 +104,7 @@ func (c *Controller) CheckFlowEngine(request *models.ParsedRequest) (int, error)
 	return http.StatusOK, nil
 }
 
-func (c *Controller) getCurrentlyUsedFlowEngineBudget(token string, userId string) (uint, error) {
+func (c *Controller) GetCurrentlyUsedFlowEngineBudget(token string, userId string) (uint, error) {
 	limit := 10000
 	offset := 0
 	var budget uint = 0

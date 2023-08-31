@@ -44,6 +44,14 @@ type ConfigStruct struct {
 
 	AdminAllowAlways bool `json:"admin_allow_always"`
 
+	CheckAndQuit bool `json:"check_and_quit"`
+
+	KeycloakClientId     string `json:"keycloak_client_id"`
+	KeycloakClientSecret string `json:"keycloak_client_secret"`
+	KeycloakUrl          string `json:"keycloak_url"`
+
+	SlackWebhookUrl string `json:"slack_webhook_url"`
+
 	Debug bool `json:"debug"`
 }
 

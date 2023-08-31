@@ -29,8 +29,6 @@ import (
 	"strings"
 )
 
-const importDeployBudgetIdentifier = "import-deploy"
-
 func (c *Controller) CheckImportDeploy(request *models.ParsedRequest) (int, error) {
 	if c.config.AdminAllowAlways && slices.Contains(request.Roles, "admin") {
 		if c.config.Debug {
@@ -53,17 +51,17 @@ func (c *Controller) CheckImportDeploy(request *models.ParsedRequest) (int, erro
 			return http.StatusBadRequest, errors.New("invalid body")
 		}
 
-		totalBudget, err := c.CheckBudgets(request.Roles, request.UserId, importDeployBudgetIdentifier)
+		totalBudget, err := c.CheckBudgets(request.Roles, request.UserId, models.BudgeIdentifierImportDeploy)
 		if err != nil {
 			return http.StatusInternalServerError, err
 		}
 
-		requiredBudget, err := c.getImportTypeCost(request.AuthToken, instance.ImportTypeId)
+		requiredBudget, err := c.getImportTypeCost(request.UserId, request.AuthToken, instance.ImportTypeId)
 		if err != nil {
 			return http.StatusInternalServerError, err
 		}
 
-		usedBudget, err := c.getCurrentlyUsedImportDeployBudget(request.AuthToken)
+		usedBudget, err := c.GetCurrentlyUsedImportDeployBudget(request.UserId, request.AuthToken)
 		if err != nil {
 			return http.StatusInternalServerError, err
 		}
@@ -84,7 +82,7 @@ func (c *Controller) CheckImportDeploy(request *models.ParsedRequest) (int, erro
 	}
 }
 
-func (c *Controller) getCurrentlyUsedImportDeployBudget(token string) (uint64, error) {
+func (c *Controller) GetCurrentlyUsedImportDeployBudget(userId string, token string) (uint64, error) {
 	token = strings.TrimPrefix(token, "bearer ")
 	token = strings.TrimPrefix(token, "Bearer ")
 
@@ -97,7 +95,7 @@ func (c *Controller) getCurrentlyUsedImportDeployBudget(token string) (uint64, e
 			return 0, err
 		}
 		for i := range instances {
-			cost, err := c.getImportTypeCost(token, instances[i].ImportTypeId)
+			cost, err := c.getImportTypeCost(userId, token, instances[i].ImportTypeId)
 			if err != nil {
 				return 0, err
 			}
@@ -111,12 +109,19 @@ func (c *Controller) getCurrentlyUsedImportDeployBudget(token string) (uint64, e
 	return budget, nil
 }
 
-func (c *Controller) getImportTypeCost(token string, importTypeId string) (uint64, error) {
+func (c *Controller) getImportTypeCost(userId string, token string, importTypeId string) (uint64, error) {
 	token = strings.TrimPrefix(token, "bearer ")
 	token = strings.TrimPrefix(token, "Bearer ")
-	importType, err, _ := c.importRepo.ReadImportType(importTypeId, auth2.Token{Token: token})
+	importType, err, code := c.importRepo.ReadImportType(importTypeId, auth2.Token{Token: token})
 	if err != nil {
-		return 0, err
+		if code == http.StatusNotFound {
+			msg := "WARNING: Import Type " + importTypeId + " no longer exists, but still in use by " + userId
+			log.Println(msg + ", assuming 0 cost")
+			err = c.SendSlackMessage(msg)
+			return 0, nil
+		} else {
+			return 0, err
+		}
 	}
 	// TODO cache
 	return importType.Cost, nil
