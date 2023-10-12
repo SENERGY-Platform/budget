@@ -119,8 +119,11 @@ func (c *Controller) getImportTypeCost(userId string, token string, importTypeId
 			log.Println(msg + ", assuming 0 cost")
 			err = c.SendSlackMessage(msg)
 			return 0, nil
-		} else {
-			return 0, err
+		} else if code == http.StatusForbidden {
+			msg := "WARNING: Import Type " + importTypeId + " is in by " + userId + ", but has no access (403)"
+			log.Println(msg + ", assuming 0 cost")
+			err = c.SendSlackMessage(msg)
+			return 0, nil
 		}
 	}
 	// TODO cache
