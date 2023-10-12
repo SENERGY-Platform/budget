@@ -28,9 +28,9 @@ func init() {
 	endpoints = append(endpoints, CheckImportDeployEndpoints)
 }
 
-func CheckImportDeployEndpoints(router *httprouter.Router, _ configuration.Config, control *controller.Controller) {
+func CheckImportDeployEndpoints(router *httprouter.Router, c configuration.Config, control *controller.Controller) {
 	router.POST("/check/import/deploy", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		parsed, err := util.ParseRequest(request.Body)
+		parsed, err := util.ParseRequest(request.Body, c.Debug)
 		if err != nil {
 			http.Error(writer, err.Error(), http.StatusBadRequest)
 		}

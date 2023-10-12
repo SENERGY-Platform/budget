@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/SENERGY-Platform/budget/pkg/models"
 	"io"
+	"log"
 	"strings"
 )
 
@@ -21,11 +22,20 @@ type headers struct {
 	Authorization string `json:"authorization"`
 }
 
-func ParseRequest(body io.Reader) (*models.ParsedRequest, error) {
+func ParseRequest(body io.Reader, debug bool) (*models.ParsedRequest, error) {
 	var checkR checkRequest
 	err := json.NewDecoder(body).Decode(&checkR)
 	if err != nil {
 		return nil, err
+	}
+
+	if debug {
+		b, err := json.Marshal(checkR)
+		if err != nil {
+			log.Println("WARN: Could not marshal checkR: " + err.Error())
+		} else {
+			log.Println(string(b))
+		}
 	}
 
 	return &models.ParsedRequest{
