@@ -36,7 +36,7 @@ type Validator struct {
 	clientToken *OpenidToken
 }
 
-var validations = []func(controller *controller.Controller, token string, userid string, roles []string) (budgetIdentifier string, maxBudget uint64, actualBudget uint64, err error){}
+var validations = []func(controller *controller.Controller, token string, userid string, roles []string, adminToken string) (budgetIdentifier string, maxBudget uint64, actualBudget uint64, err error){}
 
 func New(config configuration.Config, controller *controller.Controller) (v *Validator, err error) {
 	v = &Validator{config: config, controller: controller}
@@ -62,7 +62,7 @@ func (v *Validator) Run() (err error) {
 					return err
 				}
 			}
-			budgetIdentifier, maxBudget, actualBudget, err := validation(v.controller, "Bearer "+token.AccessToken, user.Id, roles)
+			budgetIdentifier, maxBudget, actualBudget, err := validation(v.controller, "Bearer "+token.AccessToken, user.Id, roles, v.clientToken.AccessToken)
 			if err != nil {
 				return err
 			}

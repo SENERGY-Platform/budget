@@ -25,7 +25,7 @@ func init() {
 	validations = append(validations, validateFlowEngine)
 }
 
-func validateFlowEngine(controller *controller.Controller, token string, userid string, roles []string) (budgetIdentifier string, maxBudget uint64, actualBudget uint64, err error) {
+func validateFlowEngine(controller *controller.Controller, token string, userid string, roles []string, _ string) (budgetIdentifier string, maxBudget uint64, actualBudget uint64, err error) {
 	budgetIdentifier = models.BudgeIdentifierFlowEngine
 	maxBudget, err = controller.CheckBudgets(roles, userid, budgetIdentifier)
 	if err != nil {

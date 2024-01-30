@@ -25,12 +25,12 @@ func init() {
 	validations = append(validations, validateImportDeploy)
 }
 
-func validateImportDeploy(controller *controller.Controller, token string, userid string, roles []string) (budgetIdentifier string, maxBudget uint64, actualBudget uint64, err error) {
+func validateImportDeploy(controller *controller.Controller, token string, userid string, roles []string, adminToken string) (budgetIdentifier string, maxBudget uint64, actualBudget uint64, err error) {
 	budgetIdentifier = models.BudgeIdentifierImportDeploy
 	maxBudget, err = controller.CheckBudgets(roles, userid, budgetIdentifier)
 	if err != nil {
 		return
 	}
-	actualBudget, err = controller.GetCurrentlyUsedImportDeployBudget(userid, token)
+	actualBudget, err = controller.GetCurrentlyUsedImportDeployBudget(userid, adminToken, userid)
 	return
 }

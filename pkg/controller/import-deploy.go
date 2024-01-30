@@ -61,7 +61,7 @@ func (c *Controller) CheckImportDeploy(request *models.ParsedRequest) (int, erro
 			return http.StatusInternalServerError, err
 		}
 
-		usedBudget, err := c.GetCurrentlyUsedImportDeployBudget(request.UserId, request.AuthToken)
+		usedBudget, err := c.GetCurrentlyUsedImportDeployBudget(request.UserId, request.AuthToken, "")
 		if err != nil {
 			return http.StatusInternalServerError, err
 		}
@@ -82,7 +82,7 @@ func (c *Controller) CheckImportDeploy(request *models.ParsedRequest) (int, erro
 	}
 }
 
-func (c *Controller) GetCurrentlyUsedImportDeployBudget(userId string, token string) (uint64, error) {
+func (c *Controller) GetCurrentlyUsedImportDeployBudget(userId string, token string, overwriteTokenUserId string) (uint64, error) {
 	token = strings.TrimPrefix(token, "bearer ")
 	token = strings.TrimPrefix(token, "Bearer ")
 
@@ -90,7 +90,7 @@ func (c *Controller) GetCurrentlyUsedImportDeployBudget(userId string, token str
 	var offset int64 = 0
 	var budget uint64 = 0
 	for {
-		instances, err, _ := c.importDeploy.ListInstances(auth.Token{Token: token}, int64(limit), offset, "", false, "", true)
+		instances, err, _ := c.importDeploy.ListInstances(auth.Token{Token: token}, int64(limit), offset, "", false, "", true, overwriteTokenUserId)
 		if err != nil {
 			return 0, err
 		}

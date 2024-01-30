@@ -21,7 +21,6 @@ import (
 	pipelineclient "github.com/SENERGY-Platform/analytics-pipeline/client"
 	"github.com/SENERGY-Platform/budget/pkg/configuration"
 	"github.com/SENERGY-Platform/budget/pkg/database"
-	importdeployapi "github.com/SENERGY-Platform/import-deploy/lib/api"
 	importdeployclient "github.com/SENERGY-Platform/import-deploy/lib/client"
 	importrepoapi "github.com/SENERGY-Platform/import-repository/lib/api"
 	importrepoclient "github.com/SENERGY-Platform/import-repository/lib/client"
@@ -30,7 +29,7 @@ import (
 type Controller struct {
 	config         configuration.Config
 	db             *database.Mongo
-	importDeploy   importdeployapi.Controller
+	importDeploy   importdeployclient.Interface
 	importRepo     importrepoapi.Controller
 	parsingApi     *parsing_api.ParsingApi
 	pipelineClient *pipelineclient.Client
