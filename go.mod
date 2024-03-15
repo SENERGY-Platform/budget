@@ -7,7 +7,7 @@ toolchain go1.22.1
 require (
 	github.com/SENERGY-Platform/analytics-flow-engine v0.0.7
 	github.com/SENERGY-Platform/analytics-pipeline v0.0.4
-	github.com/SENERGY-Platform/import-deploy v0.0.10
+	github.com/SENERGY-Platform/import-deploy v0.0.11
 	github.com/SENERGY-Platform/import-repository v0.0.3
 	github.com/SENERGY-Platform/service-commons v0.0.0-20240314112519-5bde66831b0d
 	github.com/julienschmidt/httprouter v1.3.0

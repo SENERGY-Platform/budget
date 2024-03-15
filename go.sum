@@ -6,8 +6,8 @@ github.com/SENERGY-Platform/analytics-fog-lib v1.1.5 h1:6e3edovAfg0kVF314tc0PK9u
 github.com/SENERGY-Platform/analytics-fog-lib v1.1.5/go.mod h1:IbFAOaWXaEkLvNyI9QSq9Mw3PtLCONkrY9WHSpqbDQg=
 github.com/SENERGY-Platform/analytics-pipeline v0.0.4 h1:1BhktNaoPUQZLbOa5h1O29VW3kFZrSq2r5eTfwOth+M=
 github.com/SENERGY-Platform/analytics-pipeline v0.0.4/go.mod h1:0kxjF/fpo1h7BrVyF01Fm9JLM/q34Xdhea2K4mnWH/4=
-github.com/SENERGY-Platform/import-deploy v0.0.10 h1:O2hkxnOYlSiCgGvBLAuW7hox0BJNNgX/Tc+FQVjJsi4=
-github.com/SENERGY-Platform/import-deploy v0.0.10/go.mod h1:He5A8EpZdCv2ikE6h4LNVl+jipuidKkADu346dS59EU=
+github.com/SENERGY-Platform/import-deploy v0.0.11 h1:M/wxLX8ivMTQxFqymCqkDZhnSzcEvO43ztYjEV42Lng=
+github.com/SENERGY-Platform/import-deploy v0.0.11/go.mod h1:He5A8EpZdCv2ikE6h4LNVl+jipuidKkADu346dS59EU=
 github.com/SENERGY-Platform/import-repository v0.0.3 h1:8llN22ELInvhJQ8ZVdXAalpRuYCjatVl6xQ9FkcKIoY=
 github.com/SENERGY-Platform/import-repository v0.0.3/go.mod h1:6PFzwd/cqof15ga0ypqnfrMvy9QAgeG4DZboTT31zRo=
 github.com/SENERGY-Platform/service-commons v0.0.0-20240314112519-5bde66831b0d h1:nyiUEVqQc4njAz98rdRFOBivN7Ar9tiI7A/ej0POEx0=
