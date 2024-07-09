@@ -5,11 +5,11 @@ go 1.22
 toolchain go1.22.1
 
 require (
-	github.com/SENERGY-Platform/analytics-flow-engine v0.0.14
+	github.com/SENERGY-Platform/analytics-flow-engine v0.0.17
 	github.com/SENERGY-Platform/analytics-pipeline v0.0.4
-	github.com/SENERGY-Platform/import-deploy v0.0.12
+	github.com/SENERGY-Platform/import-deploy v0.0.13
 	github.com/SENERGY-Platform/import-repository v0.0.3
-	github.com/SENERGY-Platform/service-commons v0.0.0-20240423132428-8eccbc027e71
+	github.com/SENERGY-Platform/service-commons v0.0.0-20240708085423-94423a495d7f
 	github.com/julienschmidt/httprouter v1.3.0
 	go.mongodb.org/mongo-driver v1.16.0
 )
@@ -17,7 +17,8 @@ require (
 require (
 	github.com/Microsoft/hcsshim v0.12.4 // indirect
 	github.com/Nerzal/gocloak/v13 v13.9.0 // indirect
-	github.com/SENERGY-Platform/analytics-fog-lib v1.1.12 // indirect
+	github.com/SENERGY-Platform/analytics-fog-lib v1.1.13 // indirect
+	github.com/SENERGY-Platform/models/go v0.0.0-20240627082833-157bd627a94f // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/containerd/containerd v1.7.18 // indirect
 	github.com/eclipse/paho.mqtt.golang v1.4.3 // indirect
