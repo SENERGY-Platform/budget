@@ -30,7 +30,7 @@ import (
 type ConfigStruct struct {
 	ApiPort string `json:"api_port"`
 
-	MongoUrl              string `json:"mongo_url"`
+	MongoUrl              string `json:"mongo_url" config:"secret"`
 	MongoReplSet          bool   `json:"mongo_repl_set"` //set true if mongodb is configured as replication set or mongos and is able to handle transactions
 	MongoTable            string `json:"mongo_table"`
 	MongoBudgetCollection string `json:"mongo_budget_collection"`
@@ -46,8 +46,8 @@ type ConfigStruct struct {
 
 	CheckAndQuit bool `json:"check_and_quit"`
 
-	KeycloakClientId     string `json:"keycloak_client_id"`
-	KeycloakClientSecret string `json:"keycloak_client_secret"`
+	KeycloakClientId     string `json:"keycloak_client_id" config:"secret"`
+	KeycloakClientSecret string `json:"keycloak_client_secret" config:"secret"`
 	KeycloakUrl          string `json:"keycloak_url"`
 
 	SlackWebhookUrl string `json:"slack_webhook_url"`
@@ -94,10 +94,13 @@ func HandleEnvironmentVars(config Config) {
 	configType := configValue.Type()
 	for index := 0; index < configType.NumField(); index++ {
 		fieldName := configType.Field(index).Name
+		fieldConfig := configType.Field(index).Tag.Get("config")
 		envName := fieldNameToEnvName(fieldName)
 		envValue := os.Getenv(envName)
 		if envValue != "" {
-			fmt.Println("use environment variable: ", envName, " = ", envValue)
+			if !strings.Contains(fieldConfig, "secret") {
+				fmt.Println("use environment variable: ", envName, " = ", envValue)
+			}
 			if configValue.FieldByName(fieldName).Kind() == reflect.Int64 {
 				i, _ := strconv.ParseInt(envValue, 10, 64)
 				configValue.FieldByName(fieldName).SetInt(i)
