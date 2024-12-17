@@ -20,13 +20,11 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/SENERGY-Platform/budget/pkg/models"
-	"github.com/SENERGY-Platform/import-deploy/lib/auth"
 	"github.com/SENERGY-Platform/import-deploy/lib/model"
-	auth2 "github.com/SENERGY-Platform/import-repository/lib/auth"
+	"github.com/SENERGY-Platform/service-commons/pkg/jwt"
 	"log"
 	"net/http"
 	"slices"
-	"strings"
 )
 
 func (c *Controller) CheckImportDeploy(request *models.ParsedRequest) (int, error) {
@@ -83,14 +81,16 @@ func (c *Controller) CheckImportDeploy(request *models.ParsedRequest) (int, erro
 }
 
 func (c *Controller) GetCurrentlyUsedImportDeployBudget(userId string, token string, overwriteTokenUserId string) (uint64, error) {
-	token = strings.TrimPrefix(token, "bearer ")
-	token = strings.TrimPrefix(token, "Bearer ")
+	parsedToken, err := jwt.Parse(token)
+	if err != nil {
+		return 0, err
+	}
 
 	limit := 10000
 	var offset int64 = 0
 	var budget uint64 = 0
 	for {
-		instances, err, _ := c.importDeploy.ListInstances(auth.Token{Token: token}, int64(limit), offset, "", false, "", true, overwriteTokenUserId)
+		instances, err, _ := c.importDeploy.ListInstances(parsedToken, int64(limit), offset, "", false, "", true, overwriteTokenUserId)
 		if err != nil {
 			return 0, err
 		}
@@ -110,9 +110,11 @@ func (c *Controller) GetCurrentlyUsedImportDeployBudget(userId string, token str
 }
 
 func (c *Controller) getImportTypeCost(userId string, token string, importTypeId string) (uint64, error) {
-	token = strings.TrimPrefix(token, "bearer ")
-	token = strings.TrimPrefix(token, "Bearer ")
-	importType, err, code := c.importRepo.ReadImportType(importTypeId, auth2.Token{Token: token})
+	parsedToken, err := jwt.Parse(token)
+	if err != nil {
+		return 0, err
+	}
+	importType, err, code := c.importRepo.ReadImportType(importTypeId, parsedToken)
 	if err != nil {
 		if code == http.StatusNotFound {
 			msg := "WARNING: Import Type " + importTypeId + " no longer exists, but still in use by " + userId
