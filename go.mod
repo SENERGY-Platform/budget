@@ -8,7 +8,7 @@ require (
 	github.com/SENERGY-Platform/analytics-flow-engine v0.0.22
 	github.com/SENERGY-Platform/analytics-pipeline v0.0.5
 	github.com/SENERGY-Platform/import-deploy v0.0.23
-	github.com/SENERGY-Platform/import-repository v0.0.11
+	github.com/SENERGY-Platform/import-repository v0.0.12
 	github.com/SENERGY-Platform/service-commons v0.0.0-20240813072046-91b3195dd8fc
 	github.com/julienschmidt/httprouter v1.3.0
 	go.mongodb.org/mongo-driver v1.16.1
