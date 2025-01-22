@@ -40,6 +40,7 @@ func BudgetEndpoints(router *httprouter.Router, _ configuration.Config, control 
 		}
 		limitInt, err := strconv.Atoi(limit)
 		if err != nil {
+			log.Println("ERROR: " + err.Error())
 			http.Error(writer, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -49,12 +50,14 @@ func BudgetEndpoints(router *httprouter.Router, _ configuration.Config, control 
 		}
 		offsetInt, err := strconv.Atoi(offset)
 		if err != nil {
+			log.Println("ERROR: " + err.Error())
 			http.Error(writer, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		budgets, err := control.GetBudgets(limitInt, offsetInt, []string{}, "", "")
 		if err != nil {
+			log.Println("ERROR: " + err.Error())
 			http.Error(writer, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -83,8 +86,10 @@ func BudgetEndpoints(router *httprouter.Router, _ configuration.Config, control 
 		err := control.DeleteBudget(request.URL.Query().Get("budget_identifier"), request.URL.Query().Get("user_id"), request.URL.Query().Get("role"))
 		if err != nil {
 			if errors.Is(err, models.ErrorNotFound) {
+				log.Println("ERROR: " + err.Error())
 				http.Error(writer, err.Error(), http.StatusNotFound)
 			} else {
+				log.Println("ERROR: " + err.Error())
 				http.Error(writer, err.Error(), http.StatusInternalServerError)
 			}
 			return

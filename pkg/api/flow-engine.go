@@ -17,11 +17,13 @@
 package api
 
 import (
+	"log"
+	"net/http"
+
 	"github.com/SENERGY-Platform/budget/pkg/api/util"
 	"github.com/SENERGY-Platform/budget/pkg/configuration"
 	"github.com/SENERGY-Platform/budget/pkg/controller"
 	"github.com/julienschmidt/httprouter"
-	"net/http"
 )
 
 func init() {
@@ -32,10 +34,12 @@ func CheckFlowEngineEndpoints(router *httprouter.Router, c configuration.Config,
 	router.POST("/check/analytics/flow-engine", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		parsed, err := util.ParseRequest(request.Body, c.Debug)
 		if err != nil {
+			log.Println("ERROR: " + err.Error())
 			http.Error(writer, err.Error(), http.StatusBadRequest)
 		}
 		code, err := control.CheckFlowEngine(parsed)
 		if err != nil {
+			log.Println("ERROR: " + err.Error())
 			http.Error(writer, err.Error(), code)
 		}
 	})
