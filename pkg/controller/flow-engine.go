@@ -109,10 +109,11 @@ func (c *Controller) GetCurrentlyUsedFlowEngineBudget(token string, userId strin
 	offset := 0
 	var budget uint = 0
 	for {
-		pipelines, err, _ := c.pipelineClient.GetPipelines(token, userId, limit, offset, "", false)
+		pipelineResp, err, _ := c.pipelineClient.GetPipelines(token, userId, limit, offset, "", false)
 		if err != nil {
 			return 0, err
 		}
+		pipelines := pipelineResp.Data
 		for _, pipeline := range pipelines {
 			for _, operator := range pipeline.Operators {
 				budget += operator.Cost

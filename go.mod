@@ -6,7 +6,7 @@ toolchain go1.23.4
 
 require (
 	github.com/SENERGY-Platform/analytics-flow-engine v0.0.22
-	github.com/SENERGY-Platform/analytics-pipeline v0.0.5
+	github.com/SENERGY-Platform/analytics-pipeline v0.0.8
 	github.com/SENERGY-Platform/import-deploy v0.0.24
 	github.com/SENERGY-Platform/import-repository v0.0.12
 	github.com/SENERGY-Platform/service-commons v0.0.0-20240813072046-91b3195dd8fc
@@ -35,6 +35,7 @@ require (
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
+	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/jtolds/gls v4.20.0+incompatible // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
