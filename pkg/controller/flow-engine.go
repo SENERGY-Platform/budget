@@ -24,6 +24,7 @@ import (
 	"log"
 	"net/http"
 	"slices"
+	"strings"
 )
 
 func (c *Controller) CheckFlowEngine(request *models.ParsedRequest) (int, error) {
@@ -63,6 +64,12 @@ func (c *Controller) CheckFlowEngine(request *models.ParsedRequest) (int, error)
 		}
 	case http.MethodPost:
 		var flow lib.PipelineRequest
+		if strings.Split(request.TargetUri, "/")[len(strings.Split(request.TargetUri, "/"))-1] == "pipelines" {
+			if c.config.Debug {
+				log.Println("Allowed: Unsupervised method")
+			}
+			return http.StatusOK, nil
+		}
 		err := json.Unmarshal(request.BodyData, &flow)
 		if err != nil {
 			return http.StatusBadRequest, errors.New("invalid body")
