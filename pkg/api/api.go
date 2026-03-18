@@ -34,7 +34,13 @@ import (
 
 var endpoints = []func(router *gin.Engine, config configuration.Config, control *controller.Controller){}
 
-// starts http server; if wg is not nil it will be set as done when the server is stopped
+// Start godoc
+// @title Budget API
+// @description Allows to define budgets and check if a given set of changes would violate these budgets.
+// @BasePath /
+// @securityDefinitions.apikey Bearer
+// @in header
+// @name Authorization
 func Start(ctx context.Context, wg *sync.WaitGroup, config configuration.Config, control *controller.Controller) (err error) {
 	log.Logger.Info("start api")
 	gin.SetMode(gin.ReleaseMode)

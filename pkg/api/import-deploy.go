@@ -34,7 +34,25 @@ func init() {
 }
 
 func CheckImportDeployEndpoints(router *gin.Engine, conf configuration.Config, control *controller.Controller) {
-	router.POST("/check/import/deploy", func(c *gin.Context) {
+	router.POST("/check/import/deploy", checkImportDeployHandler(conf, control))
+}
+
+// checkImportDeployHandler godoc
+// @Summary Check import-deploy budget
+// @Description Validates whether the requested import-deploy operation is within the caller budget.
+// @Tags checks
+// @Accept json
+// @Produce json
+// @Param request body object true "Original proxied request payload"
+// @Success 200 {string} string
+// @Failure 400 {string} ErrorResponse
+// @Failure 402 {string} ErrorResponse
+// @Failure 403 {string} ErrorResponse
+// @Failure 404 {string} ErrorResponse
+// @Failure 500 {string} ErrorResponse
+// @Router /check/import/deploy [post]
+func checkImportDeployHandler(conf configuration.Config, control *controller.Controller) gin.HandlerFunc {
+	return func(c *gin.Context) {
 		parsed, err := util.ParseRequest(c.Request.Body, conf.Debug)
 		if err != nil {
 			log.Logger.Warn("parse import-deploy request failed", attributes.ErrorKey, err)
@@ -50,5 +68,5 @@ func CheckImportDeployEndpoints(router *gin.Engine, conf configuration.Config, c
 			}
 			_ = c.Error(errors.Join(models.GetError(code), err))
 		}
-	})
+	}
 }

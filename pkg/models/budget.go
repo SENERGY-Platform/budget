@@ -17,7 +17,7 @@
 package models
 
 type Budget struct {
-	BudgetIdentifier string `json:"budget_identifier"`
+	BudgetIdentifier string `json:"budget_identifier" enums:"flow-engine,import-deploy"`
 	Role             string `json:"role,omitempty"`
 	UserId           string `json:"user_id,omitempty"`
 	Value            uint64 `json:"value"`

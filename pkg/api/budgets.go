@@ -33,8 +33,26 @@ func init() {
 	endpoints = append(endpoints, BudgetEndpoints)
 }
 
+// BudgetEndpoints registers budget management routes.
 func BudgetEndpoints(router *gin.Engine, _ configuration.Config, control *controller.Controller) {
-	router.GET("/budgets", func(c *gin.Context) {
+	router.GET("/budgets", getBudgetsHandler(control))
+	router.PUT("/budgets", setBudgetHandler(control))
+	router.DELETE("/budgets", deleteBudgetHandler(control))
+}
+
+// getBudgetsHandler godoc
+// @Summary List budgets
+// @Description Returns a paginated list of configured budgets.
+// @Tags budgets
+// @Produce json
+// @Param limit query int false "Maximum number of items to return" default(100)
+// @Param offset query int false "Number of items to skip" default(0)
+// @Success 200 {array} models.Budget
+// @Failure 400 {string} ErrorResponse
+// @Failure 500 {string} ErrorResponse
+// @Router /budgets [get]
+func getBudgetsHandler(control *controller.Controller) gin.HandlerFunc {
+	return func(c *gin.Context) {
 		limit := c.DefaultQuery("limit", "100")
 		limitInt, err := strconv.Atoi(limit)
 		if err != nil {
@@ -57,9 +75,22 @@ func BudgetEndpoints(router *gin.Engine, _ configuration.Config, control *contro
 			return
 		}
 		c.JSON(http.StatusOK, budgets)
-	})
+	}
+}
 
-	router.PUT("/budgets", func(c *gin.Context) {
+// setBudgetHandler godoc
+// @Summary Create or update budget
+// @Description Creates a budget or overwrites an existing one for the same identifier and subject.
+// @Tags budgets
+// @Accept json
+// @Produce json
+// @Param budget body models.Budget true "Budget to create or update"
+// @Success 200 {string} string
+// @Failure 400 {string} ErrorResponse
+// @Failure 500 {string} ErrorResponse
+// @Router /budgets [put]
+func setBudgetHandler(control *controller.Controller) gin.HandlerFunc {
+	return func(c *gin.Context) {
 		var budget models.Budget
 		err := c.ShouldBindJSON(&budget)
 		if err != nil {
@@ -71,9 +102,23 @@ func BudgetEndpoints(router *gin.Engine, _ configuration.Config, control *contro
 			_ = c.Error(errors.Join(models.ErrInternalServerError, err))
 			return
 		}
-	})
+	}
+}
 
-	router.DELETE("/budgets", func(c *gin.Context) {
+// deleteBudgetHandler godoc
+// @Summary Delete budget
+// @Description Deletes a budget by identifier and either user ID or role.
+// @Tags budgets
+// @Produce json
+// @Param budget_identifier query string true "Budget identifier" Enums(flow-engine, import-deploy)
+// @Param user_id query string false "User ID owning the budget"
+// @Param role query string false "Role owning the budget"
+// @Success 200 {string} string
+// @Failure 404 {string} ErrorResponse
+// @Failure 500 {string} ErrorResponse
+// @Router /budgets [delete]
+func deleteBudgetHandler(control *controller.Controller) gin.HandlerFunc {
+	return func(c *gin.Context) {
 		err := control.DeleteBudget(c.Query("budget_identifier"), c.Query("user_id"), c.Query("role"))
 		if err != nil {
 			if errors.Is(err, models.ErrNotFound) {
@@ -85,5 +130,5 @@ func BudgetEndpoints(router *gin.Engine, _ configuration.Config, control *contro
 			}
 			return
 		}
-	})
+	}
 }

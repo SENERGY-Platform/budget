@@ -34,7 +34,25 @@ func init() {
 }
 
 func CheckFlowEngineEndpoints(router *gin.Engine, conf configuration.Config, control *controller.Controller) {
-	router.POST("/check/analytics/flow-engine", func(c *gin.Context) {
+	router.POST("/check/analytics/flow-engine", checkFlowEngineHandler(conf, control))
+}
+
+// checkFlowEngineHandler godoc
+// @Summary Check analytics flow-engine budget
+// @Description Validates whether the requested flow-engine operation is within the caller budget.
+// @Tags checks
+// @Accept json
+// @Produce json
+// @Param request body object true "Original proxied request payload"
+// @Success 200 {string} string
+// @Failure 400 {string} ErrorResponse
+// @Failure 402 {string} ErrorResponse
+// @Failure 403 {string} ErrorResponse
+// @Failure 404 {string} ErrorResponse
+// @Failure 500 {string} ErrorResponse
+// @Router /check/analytics/flow-engine [post]
+func checkFlowEngineHandler(conf configuration.Config, control *controller.Controller) gin.HandlerFunc {
+	return func(c *gin.Context) {
 		parsed, err := util.ParseRequest(c.Request.Body, conf.Debug)
 		if err != nil {
 			log.Logger.Warn("parse flow-engine request failed", attributes.ErrorKey, err)
@@ -50,5 +68,5 @@ func CheckFlowEngineEndpoints(router *gin.Engine, conf configuration.Config, con
 			}
 			_ = c.Error(errors.Join(models.GetError(code), err))
 		}
-	})
+	}
 }
