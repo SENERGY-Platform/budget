@@ -17,26 +17,29 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/SENERGY-Platform/budget/pkg/api/util"
 	"github.com/SENERGY-Platform/budget/pkg/configuration"
 	"github.com/SENERGY-Platform/budget/pkg/controller"
 	"github.com/SENERGY-Platform/budget/pkg/log"
+	"github.com/SENERGY-Platform/budget/pkg/models"
 	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
-	"github.com/julienschmidt/httprouter"
+	"github.com/gin-gonic/gin"
 )
 
 func init() {
 	endpoints = append(endpoints, CheckFlowEngineEndpoints)
 }
 
-func CheckFlowEngineEndpoints(router *httprouter.Router, c configuration.Config, control *controller.Controller) {
-	router.POST("/check/analytics/flow-engine", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		parsed, err := util.ParseRequest(request.Body, c.Debug)
+func CheckFlowEngineEndpoints(router *gin.Engine, conf configuration.Config, control *controller.Controller) {
+	router.POST("/check/analytics/flow-engine", func(c *gin.Context) {
+		parsed, err := util.ParseRequest(c.Request.Body, conf.Debug)
 		if err != nil {
 			log.Logger.Warn("parse flow-engine request failed", attributes.ErrorKey, err)
-			http.Error(writer, err.Error(), http.StatusBadRequest)
+			_ = c.Error(errors.Join(models.ErrBadRequest, err))
+			return
 		}
 		code, err := control.CheckFlowEngine(parsed)
 		if err != nil {
@@ -45,7 +48,7 @@ func CheckFlowEngineEndpoints(router *httprouter.Router, c configuration.Config,
 			} else {
 				log.Logger.Warn("flow-engine check rejected", attributes.ErrorKey, err, "status_code", code)
 			}
-			http.Error(writer, err.Error(), code)
+			_ = c.Error(errors.Join(models.GetError(code), err))
 		}
 	})
 }

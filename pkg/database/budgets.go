@@ -141,7 +141,7 @@ func (this *Mongo) RemoveBudget(budgetIdentifier string, userId string, role str
 		return err
 	}
 	if result.DeletedCount == 0 {
-		return models.ErrorNotFound
+		return models.ErrNotFound
 	}
 	return nil
 }

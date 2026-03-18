@@ -16,6 +16,49 @@
 
 package models
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"net/http"
+)
 
-var ErrorNotFound = errors.New("not found")
+var ErrBadRequest = errors.New("bad request")
+var ErrInternalServerError = errors.New("internal server error")
+var ErrForbidden = fmt.Errorf("forbidden")
+var ErrNotFound = fmt.Errorf("not found")
+
+func GetStatusCode(err error) int {
+	if err == nil {
+		return http.StatusOK
+	}
+	if errors.Is(err, ErrBadRequest) {
+		return http.StatusBadRequest
+	}
+	if errors.Is(err, ErrInternalServerError) {
+		return http.StatusInternalServerError
+	}
+	if errors.Is(err, ErrNotFound) {
+		return http.StatusNotFound
+	}
+	if errors.Is(err, ErrForbidden) {
+		return http.StatusForbidden
+	}
+	return http.StatusInternalServerError
+}
+
+func GetError(code int) error {
+	switch code {
+	case http.StatusOK:
+		return nil
+	case http.StatusBadRequest:
+		return ErrBadRequest
+	case http.StatusInternalServerError:
+		return ErrInternalServerError
+	case http.StatusNotFound:
+		return ErrNotFound
+	case http.StatusForbidden:
+		return ErrForbidden
+	default:
+		return ErrInternalServerError
+	}
+}
