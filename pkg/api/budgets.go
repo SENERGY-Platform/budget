@@ -17,6 +17,7 @@
 package api
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strconv"
@@ -53,6 +54,7 @@ func BudgetEndpoints(router *gin.Engine, _ configuration.Config, control *contro
 // @Router /budgets [get]
 func getBudgetsHandler(control *controller.Controller) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		ctx := requestContext(c)
 		limit := c.DefaultQuery("limit", "100")
 		limitInt, err := strconv.Atoi(limit)
 		if err != nil {
@@ -68,7 +70,7 @@ func getBudgetsHandler(control *controller.Controller) gin.HandlerFunc {
 			return
 		}
 
-		budgets, err := control.GetBudgets(limitInt, offsetInt, []string{}, "", "")
+		budgets, err := control.GetBudgets(ctx, limitInt, offsetInt, []string{}, "", "")
 		if err != nil {
 			log.Logger.Error("get budgets failed", attributes.ErrorKey, err)
 			_ = c.Error(errors.Join(models.ErrInternalServerError, err))
@@ -91,13 +93,14 @@ func getBudgetsHandler(control *controller.Controller) gin.HandlerFunc {
 // @Router /budgets [put]
 func setBudgetHandler(control *controller.Controller) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		ctx := requestContext(c)
 		var budget models.Budget
 		err := c.ShouldBindJSON(&budget)
 		if err != nil {
 			_ = c.Error(errors.Join(models.ErrBadRequest, err))
 			return
 		}
-		err = control.SetBudget(budget)
+		err = control.SetBudget(ctx, budget)
 		if err != nil {
 			_ = c.Error(errors.Join(models.ErrInternalServerError, err))
 			return
@@ -119,7 +122,7 @@ func setBudgetHandler(control *controller.Controller) gin.HandlerFunc {
 // @Router /budgets [delete]
 func deleteBudgetHandler(control *controller.Controller) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		err := control.DeleteBudget(c.Query("budget_identifier"), c.Query("user_id"), c.Query("role"))
+		err := control.DeleteBudget(requestContext(c), c.Query("budget_identifier"), c.Query("user_id"), c.Query("role"))
 		if err != nil {
 			if errors.Is(err, models.ErrNotFound) {
 				log.Logger.Warn("delete budget failed", attributes.ErrorKey, err)
@@ -131,4 +134,11 @@ func deleteBudgetHandler(control *controller.Controller) gin.HandlerFunc {
 			return
 		}
 	}
+}
+
+func requestContext(c *gin.Context) context.Context {
+	if c != nil && c.Request != nil {
+		return c.Request.Context()
+	}
+	return context.Background()
 }

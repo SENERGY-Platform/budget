@@ -53,13 +53,14 @@ func CheckImportDeployEndpoints(router *gin.Engine, conf configuration.Config, c
 // @Router /check/import/deploy [post]
 func checkImportDeployHandler(conf configuration.Config, control *controller.Controller) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		ctx := requestContext(c)
 		parsed, err := util.ParseRequest(c.Request.Body, conf.Debug)
 		if err != nil {
 			log.Logger.Warn("parse import-deploy request failed", attributes.ErrorKey, err)
 			_ = c.Error(errors.Join(models.ErrBadRequest, err))
 			return
 		}
-		code, err := control.CheckImportDeploy(parsed)
+		code, err := control.CheckImportDeploy(ctx, parsed)
 		if err != nil {
 			if code >= http.StatusInternalServerError {
 				log.Logger.Error("import-deploy check failed", attributes.ErrorKey, err, "status_code", code)

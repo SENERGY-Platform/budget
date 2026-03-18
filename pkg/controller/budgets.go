@@ -17,31 +17,33 @@
 package controller
 
 import (
+	"context"
 	"errors"
+
 	"github.com/SENERGY-Platform/budget/pkg/models"
 )
 
-func (c *Controller) GetBudgets(limit int, offset int, roles []string, userId, budgetIdentifier string) (budgets []models.Budget, err error) {
-	return c.db.ListBudgets(limit, offset, budgetIdentifier, userId, roles)
+func (c *Controller) GetBudgets(ctx context.Context, limit int, offset int, roles []string, userId, budgetIdentifier string) (budgets []models.Budget, err error) {
+	return c.db.ListBudgets(ctx, limit, offset, budgetIdentifier, userId, roles)
 }
 
-func (c *Controller) SetBudget(budget models.Budget) (err error) {
+func (c *Controller) SetBudget(ctx context.Context, budget models.Budget) (err error) {
 	if !budget.Valid() {
 		return errors.New("invalid budget")
 	}
-	return c.db.SetBudget(budget)
+	return c.db.SetBudget(ctx, budget)
 }
 
-func (c *Controller) DeleteBudget(budgetIdentifier string, userId string, role string) (err error) {
-	return c.db.RemoveBudget(budgetIdentifier, userId, role)
+func (c *Controller) DeleteBudget(ctx context.Context, budgetIdentifier string, userId string, role string) (err error) {
+	return c.db.RemoveBudget(ctx, budgetIdentifier, userId, role)
 }
 
-func (c *Controller) CheckBudgets(roles []string, userId, budgetIdentifier string) (available uint64, err error) {
+func (c *Controller) CheckBudgets(ctx context.Context, roles []string, userId, budgetIdentifier string) (available uint64, err error) {
 	limit := 10000
 	offset := 0
 	available = 0
 	for {
-		returned, err := c.db.ListBudgets(limit, offset, budgetIdentifier, userId, roles)
+		returned, err := c.db.ListBudgets(ctx, limit, offset, budgetIdentifier, userId, roles)
 		if err != nil {
 			return 0, err
 		}

@@ -53,13 +53,14 @@ func CheckFlowEngineEndpoints(router *gin.Engine, conf configuration.Config, con
 // @Router /check/analytics/flow-engine [post]
 func checkFlowEngineHandler(conf configuration.Config, control *controller.Controller) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		ctx := requestContext(c)
 		parsed, err := util.ParseRequest(c.Request.Body, conf.Debug)
 		if err != nil {
 			log.Logger.Warn("parse flow-engine request failed", attributes.ErrorKey, err)
 			_ = c.Error(errors.Join(models.ErrBadRequest, err))
 			return
 		}
-		code, err := control.CheckFlowEngine(parsed)
+		code, err := control.CheckFlowEngine(ctx, parsed)
 		if err != nil {
 			if code >= http.StatusInternalServerError {
 				log.Logger.Error("flow-engine check failed", attributes.ErrorKey, err, "status_code", code)

@@ -77,7 +77,10 @@ func (this *Mongo) budgetCollection() *mongo.Collection {
 // if userId is set, only budgets with either the set userId or empty userId are returned. If userId is not set, budgets will not be filtered by userId
 // if roles is not empty, only budgets with one of provided roles or empty role are returned. If roles is empty, budgets will not be filtered by role
 // if budgetIdentifier is set, only budgets with the excact budgetIdentifier are returned. If budgetIdentifier is not set, budgets will not be filtered by budgetIdentifier
-func (this *Mongo) ListBudgets(limit int, offset int, budgetIdentifier string, userId string, roles []string) (result []models.Budget, err error) {
+func (this *Mongo) ListBudgets(ctx context.Context, limit int, offset int, budgetIdentifier string, userId string, roles []string) (result []models.Budget, err error) {
+	if ctx == nil {
+		ctx = this.ctx
+	}
 	err = ensureBudgetKeys()
 	if err != nil {
 		log.Logger.Error("resolve budget bson field names failed", attributes.ErrorKey, err)
@@ -97,14 +100,14 @@ func (this *Mongo) ListBudgets(limit int, offset int, budgetIdentifier string, u
 	if len(roles) > 0 {
 		filter[roleKey] = bson.M{"$in": append([]string{""}, roles...)}
 	}
-	ctx, cancel := context.WithTimeout(this.ctx, this.timeout)
+	queryCtx, cancel := context.WithTimeout(ctx, this.timeout)
 	defer cancel()
-	cursor, err := this.budgetCollection().Find(ctx, filter, opt)
+	cursor, err := this.budgetCollection().Find(queryCtx, filter, opt)
 	if err != nil {
 		return nil, err
 	}
 	result = []models.Budget{}
-	for cursor.Next(ctx) {
+	for cursor.Next(queryCtx) {
 		instance := models.Budget{}
 		err = cursor.Decode(&instance)
 		if err != nil {
@@ -116,25 +119,31 @@ func (this *Mongo) ListBudgets(limit int, offset int, budgetIdentifier string, u
 	return
 }
 
-func (this *Mongo) SetBudget(budget models.Budget) error {
+func (this *Mongo) SetBudget(ctx context.Context, budget models.Budget) error {
+	if ctx == nil {
+		ctx = this.ctx
+	}
 	err := ensureBudgetKeys()
 	if err != nil {
 		log.Logger.Error("resolve budget bson field names failed", attributes.ErrorKey, err)
 		return err
 	}
-	ctx, cancel := context.WithTimeout(this.ctx, this.timeout)
+	ctx, cancel := context.WithTimeout(ctx, this.timeout)
 	defer cancel()
 	_, err = this.budgetCollection().ReplaceOne(ctx, bson.M{budgetIdentifierKey: budget.BudgetIdentifier, userIdKey: budget.UserId, roleKey: budget.Role}, budget, options.Replace().SetUpsert(true))
 	return err
 }
 
-func (this *Mongo) RemoveBudget(budgetIdentifier string, userId string, role string) error {
+func (this *Mongo) RemoveBudget(ctx context.Context, budgetIdentifier string, userId string, role string) error {
+	if ctx == nil {
+		ctx = this.ctx
+	}
 	err := ensureBudgetKeys()
 	if err != nil {
 		log.Logger.Error("resolve budget bson field names failed", attributes.ErrorKey, err)
 		return err
 	}
-	ctx, cancel := context.WithTimeout(this.ctx, this.timeout)
+	ctx, cancel := context.WithTimeout(ctx, this.timeout)
 	defer cancel()
 	result, err := this.budgetCollection().DeleteOne(ctx, bson.M{budgetIdentifierKey: budgetIdentifier, userIdKey: userId, roleKey: role})
 	if err != nil {
