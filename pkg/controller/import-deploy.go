@@ -19,18 +19,20 @@ package controller
 import (
 	"encoding/json"
 	"errors"
-	"github.com/SENERGY-Platform/budget/pkg/models"
-	"github.com/SENERGY-Platform/import-deploy/lib/model"
-	"github.com/SENERGY-Platform/service-commons/pkg/jwt"
-	"log"
 	"net/http"
 	"slices"
+
+	"github.com/SENERGY-Platform/budget/pkg/log"
+	"github.com/SENERGY-Platform/budget/pkg/models"
+	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
+	"github.com/SENERGY-Platform/import-deploy/lib/model"
+	"github.com/SENERGY-Platform/service-commons/pkg/jwt"
 )
 
 func (c *Controller) CheckImportDeploy(request *models.ParsedRequest) (int, error) {
 	if c.config.AdminAllowAlways && slices.Contains(request.Roles, "admin") {
 		if c.config.Debug {
-			log.Println("Allowed: User is admin")
+			log.Logger.Debug("allowed request for admin user")
 		}
 		return http.StatusOK, nil
 	}
@@ -39,7 +41,7 @@ func (c *Controller) CheckImportDeploy(request *models.ParsedRequest) (int, erro
 	default:
 		// Most methods do not create a new import instance. A change of import type in PUT is not prohibited and is enforced by import-deploy
 		if c.config.Debug {
-			log.Println("Allowed: Unsupervised method")
+			log.Logger.Debug("allowed unsupervised method", "method", request.TargetMethod)
 		}
 		return http.StatusOK, nil
 	case http.MethodPost:
@@ -69,12 +71,12 @@ func (c *Controller) CheckImportDeploy(request *models.ParsedRequest) (int, erro
 		}
 		if requiredBudget > availableBudget {
 			if c.config.Debug {
-				log.Printf("Forbidden: Budget exceeded, required %d, available %d, total %d\n", requiredBudget, availableBudget, totalBudget)
+				log.Logger.Warn("budget exceeded", "required_budget", requiredBudget, "available_budget", availableBudget, "total_budget", totalBudget)
 			}
 			return http.StatusPaymentRequired, errors.New("budget exceeded")
 		}
 		if c.config.Debug {
-			log.Printf("Allowed: Budget ok, required %d, available %d, total %d\n", requiredBudget, availableBudget, totalBudget)
+			log.Logger.Debug("budget ok", "required_budget", requiredBudget, "available_budget", availableBudget, "total_budget", totalBudget)
 		}
 		return http.StatusOK, nil
 	}
@@ -118,12 +120,12 @@ func (c *Controller) getImportTypeCost(userId string, token string, importTypeId
 	if err != nil {
 		if code == http.StatusNotFound {
 			msg := "WARNING: Import Type " + importTypeId + " no longer exists, but still in use by " + userId
-			log.Println(msg + ", assuming 0 cost")
+			log.Logger.Warn(msg+", assuming 0 cost", attributes.ErrorKey, err, "import_type_id", importTypeId, "user_id", userId)
 			err = c.SendSlackMessage(msg)
 			return 0, nil
 		} else if code == http.StatusForbidden {
 			msg := "WARNING: Import Type " + importTypeId + " is in by " + userId + ", but has no access (403)"
-			log.Println(msg + ", assuming 0 cost")
+			log.Logger.Warn(msg+", assuming 0 cost", attributes.ErrorKey, err, "import_type_id", importTypeId, "user_id", userId)
 			err = c.SendSlackMessage(msg)
 			return 0, nil
 		}

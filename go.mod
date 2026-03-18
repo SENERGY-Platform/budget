@@ -1,6 +1,6 @@
 module github.com/SENERGY-Platform/budget
 
-go 1.25.0
+go 1.26.1
 
 require (
 	github.com/SENERGY-Platform/analytics-flow-engine v0.0.22
@@ -16,6 +16,7 @@ require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/SENERGY-Platform/analytics-fog-lib v1.1.26 // indirect
 	github.com/SENERGY-Platform/developer-notifications v0.0.4 // indirect
+	github.com/SENERGY-Platform/go-service-base/struct-logger v0.6.0
 	github.com/SENERGY-Platform/models/go v0.0.0-20241007061544-de7132ae94e4 // indirect
 	github.com/SENERGY-Platform/permissions-v2 v0.0.38 // indirect
 	github.com/eclipse/paho.mqtt.golang v1.4.3 // indirect

@@ -19,13 +19,15 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"github.com/SENERGY-Platform/budget/pkg/configuration"
-	"github.com/SENERGY-Platform/budget/pkg/controller"
-	"github.com/SENERGY-Platform/budget/pkg/models"
-	"github.com/julienschmidt/httprouter"
-	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/SENERGY-Platform/budget/pkg/configuration"
+	"github.com/SENERGY-Platform/budget/pkg/controller"
+	"github.com/SENERGY-Platform/budget/pkg/log"
+	"github.com/SENERGY-Platform/budget/pkg/models"
+	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
+	"github.com/julienschmidt/httprouter"
 )
 
 func init() {
@@ -40,7 +42,7 @@ func BudgetEndpoints(router *httprouter.Router, _ configuration.Config, control 
 		}
 		limitInt, err := strconv.Atoi(limit)
 		if err != nil {
-			log.Println("ERROR: " + err.Error())
+			log.Logger.Warn("invalid limit query parameter", attributes.ErrorKey, err, "limit", limit)
 			http.Error(writer, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -50,21 +52,21 @@ func BudgetEndpoints(router *httprouter.Router, _ configuration.Config, control 
 		}
 		offsetInt, err := strconv.Atoi(offset)
 		if err != nil {
-			log.Println("ERROR: " + err.Error())
+			log.Logger.Warn("invalid offset query parameter", attributes.ErrorKey, err, "offset", offset)
 			http.Error(writer, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		budgets, err := control.GetBudgets(limitInt, offsetInt, []string{}, "", "")
 		if err != nil {
-			log.Println("ERROR: " + err.Error())
+			log.Logger.Error("get budgets failed", attributes.ErrorKey, err)
 			http.Error(writer, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		writer.Header().Set("Content-Type", "application/json; charset=utf-8")
 		err = json.NewEncoder(writer).Encode(budgets)
 		if err != nil {
-			log.Println("ERROR: unable to encode response", err)
+			log.Logger.Error("unable to encode response", attributes.ErrorKey, err)
 		}
 	})
 
@@ -86,10 +88,10 @@ func BudgetEndpoints(router *httprouter.Router, _ configuration.Config, control 
 		err := control.DeleteBudget(request.URL.Query().Get("budget_identifier"), request.URL.Query().Get("user_id"), request.URL.Query().Get("role"))
 		if err != nil {
 			if errors.Is(err, models.ErrorNotFound) {
-				log.Println("ERROR: " + err.Error())
+				log.Logger.Warn("delete budget failed", attributes.ErrorKey, err)
 				http.Error(writer, err.Error(), http.StatusNotFound)
 			} else {
-				log.Println("ERROR: " + err.Error())
+				log.Logger.Error("delete budget failed", attributes.ErrorKey, err)
 				http.Error(writer, err.Error(), http.StatusInternalServerError)
 			}
 			return

@@ -15,5 +15,6 @@
   "keycloak_client_secret": "",
   "keycloak_url": "https://auth.senergy.infai.org",
   "slack_webhook_url": "",
-  "debug": true
+  "debug": true,
+  "log_handler": "json"
 }

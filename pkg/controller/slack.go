@@ -21,14 +21,15 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/SENERGY-Platform/budget/pkg/log"
 )
 
 func (c *Controller) SendSlackMessage(message string) error {
 	if len(c.config.SlackWebhookUrl) == 0 {
-		log.Println("WARNING: SlackWebhookUrl not configured, assuming thats okay")
+		log.Logger.Warn("SlackWebhookUrl not configured, assuming thats okay")
 		return nil
 	}
 	j := make(map[string]string)

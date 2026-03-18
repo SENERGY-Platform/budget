@@ -14,6 +14,8 @@ github.com/SENERGY-Platform/analytics-pipeline v0.0.30 h1:fD+FgBWicA1s1Ta8QEfSYk
 github.com/SENERGY-Platform/analytics-pipeline v0.0.30/go.mod h1:nQ+4fu3v5/UFeH6QQ61n8RQ6mthpj8Ov2ue2ck3LOk8=
 github.com/SENERGY-Platform/developer-notifications v0.0.4 h1:SmblhfWavNhE1mDxzrkhmWl2AoPPqKD+7YcZCQ7a5Tg=
 github.com/SENERGY-Platform/developer-notifications v0.0.4/go.mod h1:8yJrYnAYMtPEPy89ULw8ivgG8orVhSnaLgyfDt0bdgg=
+github.com/SENERGY-Platform/go-service-base/struct-logger v0.6.0 h1:DQNAPU1DI3XNyLaIGnHN9O0gZ7Q+tyOq/ZmAvbL/5gg=
+github.com/SENERGY-Platform/go-service-base/struct-logger v0.6.0/go.mod h1:z9cf8WOUMLoifRj5Tqts1MNe6QoPFq5Msxj899ZC11g=
 github.com/SENERGY-Platform/import-deploy v0.0.24 h1:LyynNk2CCEI6XUAw2pe8dCxiu0p3GYD5eBd8MPcfiEY=
 github.com/SENERGY-Platform/import-deploy v0.0.24/go.mod h1:0G2ULjv0VNKEPVGQsccUHpb0HySsA2fUrY9Jli+ctKs=
 github.com/SENERGY-Platform/import-repository v0.0.12 h1:AAoqYjX4XCc+Xaufs0kuH7lgLXUUaajEQGNgMxWSYyo=

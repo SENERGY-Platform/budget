@@ -19,18 +19,19 @@ package controller
 import (
 	"encoding/json"
 	"errors"
-	"github.com/SENERGY-Platform/analytics-flow-engine/pkg/lib"
-	"github.com/SENERGY-Platform/budget/pkg/models"
-	"log"
 	"net/http"
 	"slices"
 	"strings"
+
+	"github.com/SENERGY-Platform/analytics-flow-engine/pkg/lib"
+	"github.com/SENERGY-Platform/budget/pkg/log"
+	"github.com/SENERGY-Platform/budget/pkg/models"
 )
 
 func (c *Controller) CheckFlowEngine(request *models.ParsedRequest) (int, error) {
 	if c.config.AdminAllowAlways && slices.Contains(request.Roles, "admin") {
 		if c.config.Debug {
-			log.Println("Allowed: User is admin")
+			log.Logger.Debug("allowed request for admin user")
 		}
 		return http.StatusOK, nil
 	}
@@ -42,7 +43,7 @@ func (c *Controller) CheckFlowEngine(request *models.ParsedRequest) (int, error)
 	default:
 		// Most methods do not create a new import flow.
 		if c.config.Debug {
-			log.Println("Allowed: Unsupervised method")
+			log.Logger.Debug("allowed unsupervised method", "method", request.TargetMethod)
 		}
 		return http.StatusOK, nil
 	case http.MethodPut:
@@ -66,7 +67,7 @@ func (c *Controller) CheckFlowEngine(request *models.ParsedRequest) (int, error)
 		var flow lib.PipelineRequest
 		if strings.Split(request.TargetUri, "/")[len(strings.Split(request.TargetUri, "/"))-1] == "pipelines" {
 			if c.config.Debug {
-				log.Println("Allowed: Unsupervised method")
+				log.Logger.Debug("allowed unsupervised method", "method", request.TargetMethod, "target_uri", request.TargetUri)
 			}
 			return http.StatusOK, nil
 		}
@@ -101,12 +102,12 @@ func (c *Controller) CheckFlowEngine(request *models.ParsedRequest) (int, error)
 	}
 	if uint64(requiredBudget) > availableBudget {
 		if c.config.Debug {
-			log.Printf("Forbidden: Budget exceeded, required %d, available %d, total %d\n", requiredBudget, availableBudget, totalBudget)
+			log.Logger.Warn("budget exceeded", "required_budget", requiredBudget, "available_budget", availableBudget, "total_budget", totalBudget)
 		}
 		return http.StatusPaymentRequired, errors.New("budget exceeded")
 	}
 	if c.config.Debug {
-		log.Printf("Allowed: Budget ok, required %d, available %d, total %d\n", requiredBudget, availableBudget, totalBudget)
+		log.Logger.Debug("budget ok", "required_budget", requiredBudget, "available_budget", availableBudget, "total_budget", totalBudget)
 	}
 	return http.StatusOK, nil
 }

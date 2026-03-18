@@ -17,12 +17,13 @@
 package api
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/SENERGY-Platform/budget/pkg/api/util"
 	"github.com/SENERGY-Platform/budget/pkg/configuration"
 	"github.com/SENERGY-Platform/budget/pkg/controller"
+	"github.com/SENERGY-Platform/budget/pkg/log"
+	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -34,13 +35,17 @@ func CheckImportDeployEndpoints(router *httprouter.Router, c configuration.Confi
 	router.POST("/check/import/deploy", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
 		parsed, err := util.ParseRequest(request.Body, c.Debug)
 		if err != nil {
-			log.Println("ERROR: " + err.Error())
+			log.Logger.Warn("parse import-deploy request failed", attributes.ErrorKey, err)
 			http.Error(writer, err.Error(), http.StatusBadRequest)
 		}
 
 		code, err := control.CheckImportDeploy(parsed)
 		if err != nil {
-			log.Println("ERROR: " + err.Error())
+			if code >= http.StatusInternalServerError {
+				log.Logger.Error("import-deploy check failed", attributes.ErrorKey, err, "status_code", code)
+			} else {
+				log.Logger.Warn("import-deploy check rejected", attributes.ErrorKey, err, "status_code", code)
+			}
 			http.Error(writer, err.Error(), code)
 		}
 	})

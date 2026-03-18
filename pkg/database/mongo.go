@@ -19,15 +19,17 @@ package database
 import (
 	"context"
 	"errors"
+	"reflect"
+	"sync"
+	"time"
+
 	"github.com/SENERGY-Platform/budget/pkg/configuration"
+	"github.com/SENERGY-Platform/budget/pkg/log"
+	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsoncodec"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"log"
-	"reflect"
-	"sync"
-	"time"
 )
 
 type Mongo struct {
@@ -93,7 +95,7 @@ func (this *Mongo) Transaction(ctx context.Context) (resultCtx context.Context, 
 			err = session.AbortTransaction(resultCtx)
 		}
 		if err != nil {
-			log.Println("ERROR: unable to finish mongo transaction", err)
+			log.Logger.Error("unable to finish mongo transaction", attributes.ErrorKey, err)
 		}
 		return err
 	}, nil
@@ -106,7 +108,7 @@ func (this *Mongo) ensureIndex(collection *mongo.Collection, indexname string, i
 		direction = 1
 	}
 	_, err := collection.Indexes().CreateOne(ctx, mongo.IndexModel{
-		Keys:    bson.D{{indexKey, direction}},
+		Keys:    bson.D{{Key: indexKey, Value: direction}},
 		Options: options.Index().SetName(indexname).SetUnique(unique),
 	})
 	return err
@@ -130,7 +132,12 @@ func (this *Mongo) ensureCompoundIndex(collection *mongo.Collection, indexname s
 }
 
 func (this *Mongo) Disconnect() {
-	log.Println(this.client.Disconnect(context.Background()))
+	err := this.client.Disconnect(context.Background())
+	if err != nil {
+		log.Logger.Error("mongo disconnect failed", attributes.ErrorKey, err)
+		return
+	}
+	log.Logger.Debug("mongo disconnected")
 }
 
 func getBsonFieldName(obj interface{}, fieldName string) (bsonName string, err error) {

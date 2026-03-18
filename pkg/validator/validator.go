@@ -20,14 +20,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/SENERGY-Platform/budget/pkg/configuration"
-	"github.com/SENERGY-Platform/budget/pkg/controller"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/SENERGY-Platform/budget/pkg/configuration"
+	"github.com/SENERGY-Platform/budget/pkg/controller"
+	"github.com/SENERGY-Platform/budget/pkg/log"
 )
 
 type Validator struct {
@@ -67,7 +68,7 @@ func (v *Validator) Run() (err error) {
 				return err
 			}
 			if v.config.Debug {
-				log.Printf("%s \t %s \t %s \t %d/%d\n", user.Username, user.Id, budgetIdentifier, actualBudget, maxBudget)
+				log.Logger.Debug("budget validation", "username", user.Username, "user_id", user.Id, "budget_identifier", budgetIdentifier, "actual_budget", actualBudget, "max_budget", maxBudget)
 			}
 			if actualBudget > maxBudget {
 				err := v.notifyOverBudget(budgetIdentifier, user, maxBudget, actualBudget)
@@ -195,7 +196,7 @@ func (v *Validator) getUserRoles(userId string) (roles []string, err error) {
 
 func (v *Validator) notifyOverBudget(budgetIdentifier string, user KeycloakUser, maxBudget uint64, actualBudget uint64) error {
 	msg := fmt.Sprintf("ALERT! User %s %s overuses budget %s by %d", user.Username, user.Id, budgetIdentifier, actualBudget-maxBudget)
-	log.Println(msg)
+	log.Logger.Warn(msg, "username", user.Username, "user_id", user.Id, "budget_identifier", budgetIdentifier, "max_budget", maxBudget, "actual_budget", actualBudget)
 	return v.controller.SendSlackMessage(msg)
 }
 

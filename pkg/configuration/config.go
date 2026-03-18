@@ -52,7 +52,8 @@ type ConfigStruct struct {
 
 	SlackWebhookUrl string `json:"slack_webhook_url"`
 
-	Debug bool `json:"debug"`
+	Debug      bool   `json:"debug"`
+	LogHandler string `json:"log_handler"`
 }
 
 type Config = *ConfigStruct

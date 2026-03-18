@@ -2,10 +2,12 @@ package util
 
 import (
 	"encoding/json"
-	"github.com/SENERGY-Platform/budget/pkg/models"
 	"io"
-	"log"
 	"strings"
+
+	"github.com/SENERGY-Platform/budget/pkg/log"
+	"github.com/SENERGY-Platform/budget/pkg/models"
+	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
 )
 
 type checkRequest struct {
@@ -32,9 +34,9 @@ func ParseRequest(body io.Reader, debug bool) (*models.ParsedRequest, error) {
 	if debug {
 		b, err := json.Marshal(checkR)
 		if err != nil {
-			log.Println("WARN: Could not marshal checkR: " + err.Error())
+			log.Logger.Warn("could not marshal parsed request", attributes.ErrorKey, err)
 		} else {
-			log.Println(string(b))
+			log.Logger.Debug("parsed request", "request", string(b))
 		}
 	}
 

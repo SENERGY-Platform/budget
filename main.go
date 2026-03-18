@@ -19,14 +19,17 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/SENERGY-Platform/budget/pkg"
-	"github.com/SENERGY-Platform/budget/pkg/configuration"
 	"log"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/SENERGY-Platform/budget/pkg"
+	"github.com/SENERGY-Platform/budget/pkg/configuration"
+	_log "github.com/SENERGY-Platform/budget/pkg/log"
+	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
 )
 
 func main() {
@@ -37,17 +40,19 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	_log.Init(config)
 
 	ctx, cancel := context.WithCancel(context.Background())
 
 	onError := func(err error, wg *sync.WaitGroup) {
+		_log.Logger.Error("fatal error", attributes.ErrorKey, err)
 		log.Println("FATAL: " + err.Error())
 		cancel()
 		if wg != nil {
 			go func() { // safety routine shuts program down if wg does not finish
 				d := 10 * time.Second
 				<-time.After(d)
-				log.Println("Could not shutdown in " + d.String() + ", halting now")
+				_log.Logger.Error("Could not shutdown in " + d.String() + ", halting now")
 				os.Exit(1)
 			}()
 			wg.Wait()
@@ -64,7 +69,7 @@ func main() {
 		shutdown := make(chan os.Signal, 1)
 		signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
 		sig := <-shutdown
-		log.Println("received shutdown signal", sig)
+		_log.Logger.Info("received shutdown signal", "signal", sig)
 		cancel()
 	}()
 
