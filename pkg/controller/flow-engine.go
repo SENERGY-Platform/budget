@@ -24,7 +24,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/SENERGY-Platform/analytics-flow-engine/pkg/lib"
+	"github.com/SENERGY-Platform/analytics-flow-engine/lib"
 	"github.com/SENERGY-Platform/budget/pkg/log"
 	"github.com/SENERGY-Platform/budget/pkg/models"
 )
