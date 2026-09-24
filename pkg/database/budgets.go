@@ -45,7 +45,7 @@ func init() {
 			log.Logger.Error("resolve budget bson field names failed", attributes.ErrorKey, err)
 			return err
 		}
-		collection := db.client.Database(db.config.MongoTable).Collection(db.config.MongoBudgetCollection)
+		collection := db.client.Database(db.config.MongoDatabase).Collection(db.config.MongoBudgetCollection)
 		err = db.ensureCompoundIndex(collection, "identifierRoleUser", true, true, budgetIdentifierKey, roleKey, userIdKey)
 		if err != nil {
 			return err
@@ -70,7 +70,7 @@ func ensureBudgetKeys() error {
 }
 
 func (this *Mongo) budgetCollection() *mongo.Collection {
-	return this.client.Database(this.config.MongoTable).Collection(this.config.MongoBudgetCollection)
+	return this.client.Database(this.config.MongoDatabase).Collection(this.config.MongoBudgetCollection)
 }
 
 // Search Logic:

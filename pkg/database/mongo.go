@@ -19,7 +19,9 @@ package database
 import (
 	"context"
 	"errors"
+	"fmt"
 	"reflect"
+	"strings"
 	"sync"
 	"time"
 
@@ -41,14 +43,28 @@ type Mongo struct {
 
 var CreateCollections = []func(db *Mongo) error{}
 
+const startupCheckTimeout = 10 * time.Second
+
 func New(conf configuration.Config, ctx context.Context, wg *sync.WaitGroup) (*Mongo, error) {
 	duration, err := time.ParseDuration(conf.MongoTimeout)
 	if err != nil {
 		return nil, err
 	}
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(conf.MongoUrl))
+	opts, err := newClientOptions(conf)
 	if err != nil {
 		return nil, err
+	}
+	client, err := connect(ctx, opts, conf.MongoDatabase, startupCheckTimeout)
+	if err != nil {
+		return nil, err
+	}
+	db := &Mongo{config: conf, client: client, ctx: ctx, timeout: duration}
+	for _, creators := range CreateCollections {
+		err = creators(db)
+		if err != nil {
+			disconnect(client, startupCheckTimeout)
+			return nil, err
+		}
 	}
 	wg.Add(1)
 	go func() {
@@ -56,15 +72,59 @@ func New(conf configuration.Config, ctx context.Context, wg *sync.WaitGroup) (*M
 		_ = client.Disconnect(context.Background())
 		wg.Done()
 	}()
-	db := &Mongo{config: conf, client: client, ctx: ctx, timeout: duration}
-	for _, creators := range CreateCollections {
-		err = creators(db)
-		if err != nil {
-			_ = client.Disconnect(context.Background())
-			return nil, err
-		}
-	}
 	return db, nil
+}
+
+// newClientOptions is replaced in tests to observe the client New creates.
+var newClientOptions = clientOptions
+
+// clientOptions validates the config and builds the driver options without touching the network.
+func clientOptions(conf configuration.Config) (*options.ClientOptions, error) {
+	if strings.TrimSpace(conf.MongoDatabase) == "" {
+		return nil, errors.New("MONGO_DATABASE must not be empty")
+	}
+	if conf.MongoUser != "" && conf.MongoPassword == "" {
+		return nil, errors.New("MONGO_PASSWORD must not be empty when MONGO_USER is set")
+	}
+	opts := options.Client().ApplyURI(conf.MongoUrl)
+	if conf.MongoUser != "" {
+		// Replaces user, password, authSource and authMechanism given in MongoUrl.
+		opts.SetAuth(options.Credential{
+			Username:   conf.MongoUser,
+			Password:   conf.MongoPassword,
+			AuthSource: conf.MongoAuthSource,
+		})
+	}
+	if err := opts.Validate(); err != nil {
+		return nil, fmt.Errorf("invalid mongo client options: %w", err)
+	}
+	return opts, nil
+}
+
+// connect runs an authenticated listCollections because mongo.Connect is lazy and ping needs no auth.
+func connect(ctx context.Context, opts *options.ClientOptions, database string, timeout time.Duration) (*mongo.Client, error) {
+	checkCtx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+	client, err := mongo.Connect(checkCtx, opts)
+	if err != nil {
+		return nil, fmt.Errorf("mongo connect failed: %w", err)
+	}
+	_, err = client.Database(database).ListCollectionNames(checkCtx, bson.D{},
+		options.ListCollections().SetNameOnly(true).SetAuthorizedCollections(true))
+	if err != nil {
+		disconnect(client, timeout)
+		return nil, fmt.Errorf("mongo startup check failed: %w", err)
+	}
+	return client, nil
+}
+
+// disconnect uses its own context so that it also works when the startup context is already done.
+func disconnect(client *mongo.Client, timeout time.Duration) {
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	if err := client.Disconnect(ctx); err != nil {
+		log.Logger.Error("mongo disconnect failed", attributes.ErrorKey, err)
+	}
 }
 
 func (this *Mongo) Transaction(ctx context.Context) (resultCtx context.Context, close func(success bool) error, err error) {

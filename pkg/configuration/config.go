@@ -31,8 +31,11 @@ type ConfigStruct struct {
 	ApiPort string `json:"api_port"`
 
 	MongoUrl              string `json:"mongo_url" config:"secret"`
+	MongoUser             string `json:"mongo_user"`
+	MongoPassword         string `json:"mongo_password" config:"secret"`
+	MongoAuthSource       string `json:"mongo_auth_source"`
+	MongoDatabase         string `json:"mongo_database"`
 	MongoReplSet          bool   `json:"mongo_repl_set"` //set true if mongodb is configured as replication set or mongos and is able to handle transactions
-	MongoTable            string `json:"mongo_table"`
 	MongoBudgetCollection string `json:"mongo_budget_collection"`
 	MongoTimeout          string `json:"mongo_timeout"`
 
