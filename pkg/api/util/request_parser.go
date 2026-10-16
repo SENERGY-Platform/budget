@@ -3,11 +3,11 @@ package util
 import (
 	"encoding/json"
 	"io"
+	"sort"
 	"strings"
 
 	"github.com/SENERGY-Platform/budget/pkg/log"
 	"github.com/SENERGY-Platform/budget/pkg/models"
-	"github.com/SENERGY-Platform/go-service-base/struct-logger/attributes"
 )
 
 type checkRequest struct {
@@ -32,12 +32,7 @@ func ParseRequest(body io.Reader, debug bool) (*models.ParsedRequest, error) {
 	}
 
 	if debug {
-		b, err := json.Marshal(checkR)
-		if err != nil {
-			log.Logger.Warn("could not marshal parsed request", attributes.ErrorKey, err)
-		} else {
-			log.Logger.Debug("parsed request", "request", string(b))
-		}
+		logParsedRequest(checkR)
 	}
 
 	return &models.ParsedRequest{
@@ -49,4 +44,38 @@ func ParseRequest(body io.Reader, debug bool) (*models.ParsedRequest, error) {
 		UriArgs:      checkR.UriArgs,
 		BodyData:     []byte(checkR.BodyData),
 	}, nil
+}
+
+// logParsedRequest logs the request without credentials: the authorization header is reduced to its scheme,
+// uri args to their keys and the body to its size.
+func logParsedRequest(r checkRequest) {
+	argKeys := make([]string, 0, len(r.UriArgs))
+	for k := range r.UriArgs {
+		argKeys = append(argKeys, k)
+	}
+	sort.Strings(argKeys)
+	log.Logger.Debug("parsed request",
+		"target_method", r.Headers.TargetMethod,
+		"target_uri", r.Headers.TargetUri,
+		"x-user-roles", r.Headers.XUserRoles,
+		"x-userid", r.Headers.XUserId,
+		"authorization_scheme", authorizationScheme(r.Headers.Authorization),
+		"uri_arg_keys", argKeys,
+		"body_data_size", len(r.BodyData),
+	)
+}
+
+func authorizationScheme(authorization string) string {
+	if authorization == "" {
+		return "none"
+	}
+	scheme, _, _ := strings.Cut(authorization, " ")
+	switch strings.ToLower(scheme) {
+	case "bearer":
+		return "Bearer"
+	case "basic":
+		return "Basic"
+	default:
+		return "other"
+	}
 }
