@@ -5,7 +5,7 @@ go 1.26.3
 require (
 	github.com/SENERGY-Platform/analytics-flow-engine v0.0.82
 	github.com/SENERGY-Platform/analytics-pipeline v0.0.41
-	github.com/SENERGY-Platform/gin-middleware v0.14.1
+	github.com/SENERGY-Platform/gin-middleware v0.14.2
 	github.com/SENERGY-Platform/import-deploy v0.1.1
 	github.com/SENERGY-Platform/import-repository v0.0.15
 	github.com/SENERGY-Platform/service-commons v0.0.0-20260821114734-3e4578ac2358
