@@ -22,6 +22,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/SENERGY-Platform/budget/pkg/log"
@@ -40,6 +41,11 @@ func (c *Controller) SendSlackMessage(message string) error {
 	}
 	resp, err := http.Post(c.config.SlackWebhookUrl, "application/json", bytes.NewBuffer(b))
 	if err != nil {
+		// A *url.Error carries the webhook URL, and with it the token; return only its cause.
+		var urlErr *url.Error
+		if errors.As(err, &urlErr) {
+			return errors.New("slack webhook: " + urlErr.Op + ": " + urlErr.Err.Error())
+		}
 		return err
 	}
 	defer resp.Body.Close()

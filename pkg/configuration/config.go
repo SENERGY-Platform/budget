@@ -53,7 +53,7 @@ type ConfigStruct struct {
 	KeycloakClientSecret string `json:"keycloak_client_secret" config:"secret"`
 	KeycloakUrl          string `json:"keycloak_url"`
 
-	SlackWebhookUrl string `json:"slack_webhook_url"`
+	SlackWebhookUrl string `json:"slack_webhook_url" config:"secret"`
 
 	Debug      bool   `json:"debug"`
 	LogHandler string `json:"log_handler"`

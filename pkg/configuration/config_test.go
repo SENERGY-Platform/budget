@@ -116,3 +116,20 @@ func TestLoadMongoFromEnv(t *testing.T) {
 		t.Errorf("used variables not reported: %q", printed)
 	}
 }
+
+func TestLoadSlackWebhookNotPrinted(t *testing.T) {
+	const webhook = "https://hooks.slack.com/services/T000/B000/not-a-real-token"
+	t.Setenv("SLACK_WEBHOOK_URL", webhook)
+	var conf Config
+	var err error
+	printed := captureStdout(t, func() { conf, err = Load("../../config.json") })
+	if err != nil {
+		t.Fatal(err)
+	}
+	if conf.SlackWebhookUrl != webhook {
+		t.Errorf("got %q, want %q", conf.SlackWebhookUrl, webhook)
+	}
+	if strings.Contains(printed, "not-a-real-token") {
+		t.Errorf("webhook printed: %q", printed)
+	}
+}
